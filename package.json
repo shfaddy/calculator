@@ -1,0 +1,21 @@
+{
+  "name": "calculator",
+  "version": "1.0.0",
+  "description": "Shaikh Faddy's Calculator",
+  "main": "index.mjs",
+  "exports": "./index.mjs",
+  "bin": {
+    "calculator": "./shell.mjs",
+    "calc": "./shell.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shfaddy/calculator.git"
+  },
+  "author": "Shaikh Faddy <shfaddy@gmail.com>",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/shfaddy/calculator/issues"
+  },
+  "homepage": "https://github.com/shfaddy/calculator#readme"
+}
