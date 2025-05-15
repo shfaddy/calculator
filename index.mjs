@@ -1,11 +1,22 @@
 export default class Calculator extends Set {
 
-$_prompt () {
+$_prompt ( $, ... argv ) {
+
+return [
+
+$ [ Symbol .for ( 'location' ) ] (),
+... argv
+
+] .join ( ': ' );
+
+};
+
+$_location () {
 
 if ( ! this .binder )
 return this .name ?.length ? [ this .name ] : [];
 
-return [ ... this .binder [ Symbol .for ( 'prompt' ) ] (), this .name ];
+return [ ... this .binder [ Symbol .for ( 'location' ) ] (), this .name ];
 
 };
 
@@ -39,8 +50,6 @@ return $ [ '#' ] ( calculator, descriptor );
 
 }
 
-
-
 } );
 
 case 'string':
@@ -60,7 +69,7 @@ if ( ! argv .length )
 return this .result;
 
 if ( ! this .has ( argv [ 0 ] ) )
-throw "Unknown calculator";
+throw $ [ Symbol .for ( 'prompt' ) ] ( "Unknown calculator: " + argv .shift () );
 
 return $ [ Symbol .for ( 'calculator/' + argv .shift () ) ] ( ... argv );
 
@@ -79,14 +88,13 @@ $_parse ( $, input ) {
 if ( input === '$' )
 return this .result;
 
-if ( input .startsWith ( '#' ) )
-return $ ( ... input .slice ( 1 ) .split ( '/' ) );
+if ( isNaN ( input ) )
 
 if ( input .startsWith ( '$' ) )
 return $ .$ ( input .slice ( 1 ) );
 
-if ( isNaN ( input ) )
-throw "Invalid numeric input";
+else
+return $ ( ... input .split ( '/' ) );
 
 return parseFloat ( input );
 

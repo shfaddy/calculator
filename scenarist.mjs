@@ -1,13 +1,4 @@
-export default ( ... argv ) => {
-
-const scenarist = new Scenarist ( ... argv );
-
-if ( scenarist .production instanceof Promise )
-return scenarist .production .then ( () => scenarist .play );
-
-return scenarist .play;
-
-};
+export default ( ... argv ) => new Scenarist ( ... argv ) .play;
 
 class Scenarist {
 
@@ -17,13 +8,13 @@ this .play = new Proxy ( typeof ( this .scenario = scenario ) === 'function' ? s
 this .player = player;
 
 if ( typeof scenario === 'object' && typeof this .scenario ?.$_producer === 'function' )
-this .production = this .play ( Symbol .for ( 'producer' ) );
+this .play ( Symbol .for ( 'producer' ) );
 
 };
 
 apply ( scenario, _, argv ) {
 
-if ( argv [ 0 ] ?.[ Scenarist .#stamp ] === Scenarist .#stamp )
+if ( typeof argv [ 0 ] === 'function' && argv [ 0 ] ?.[ Scenarist .#stamp ] === Scenarist .#stamp )
 argv .shift ();
 
 if ( scenario === this .scenario )
@@ -84,7 +75,15 @@ break;
 
 case 'undefined':
 
-resolution = cue !== Symbol .for ( 'director' ) ? this .play ( Symbol .for ( 'director' ), cue, ... Object .assign ( argv, { cut: true } ) .splice ( 0 ) ) : resolution;
+if ( cue !== Symbol .for ( 'director' ) )
+resolution = this .play (
+
+Symbol .for ( 'director' ), cue, ... Object .assign ( argv, { cut: true } ) .splice ( 0 )
+
+);
+
+else
+argv .shift (), resolution;
 
 break;
 
