@@ -1,52 +1,34 @@
+import Formula from './formula.mjs';
+
 export default class Calculator extends Set {
 
-$_prompt ( $, ... argv ) {
-
-return [
-
-$ [ Symbol .for ( 'location' ) ] (),
-... argv
-
-] .join ( ': ' );
-
-};
-
-$_location () {
-
-if ( ! this .binder )
-return this .name ?.length ? [ this .name ] : [];
-
-return [ ... this .binder [ Symbol .for ( 'location' ) ] (), this .name ];
-
-};
-
-constructor ( name, descriptor = {}, binder ) {
+constructor ( details ) {
 
 super ();
 
-this .name = name;
-this .descriptor = descriptor;
-this .binder = binder;
+this .name = details ?.name;
+this .manifest = details ?.manifest;
+this .binder = details ?.binder;
 
 };
 
 $_producer ( $ ) {
 
-switch ( typeof this .descriptor ) {
+switch ( typeof this .manifest ) {
 
 case 'object':
 
-return Object .entries ( this .descriptor ) .forEach ( ( [ calculator, descriptor ] ) => {
+return Object .entries ( this .manifest ) .forEach ( ( [ calculator, manifest ] ) => {
 
-switch ( typeof descriptor ) {
+switch ( typeof manifest ) {
 
 case 'string':
 
-return $ .$ ( calculator, ... descriptor .trim () .split ( /\s+/ ) );
+return $ .$ ( calculator, ... manifest .trim () .split ( /\s+/ ) );
 
 default:
 
-return $ [ '#' ] ( calculator, descriptor );
+return $ [ '#' ] ( calculator, manifest );
 
 }
 
@@ -55,7 +37,7 @@ return $ [ '#' ] ( calculator, descriptor );
 case 'string':
 case 'number':
 
-return $ [ '=' ] ( this .descriptor .toString () );
+return $ [ '=' ] ( this .manifest .toString () );
 
 }
 
@@ -89,11 +71,6 @@ if ( input === '$' )
 return this .result;
 
 if ( isNaN ( input ) )
-
-if ( input .startsWith ( '$' ) )
-return $ .$ ( input .slice ( 1 ) );
-
-else
 return $ ( ... input .split ( '/' ) );
 
 return parseFloat ( input );
@@ -110,17 +87,34 @@ const calculator = argv .shift ();
 if ( this .has ( calculator ) )
 throw `Calculator #${ calculator } already exists`;
 
-this [ '$_calculator/' + calculator ] = new this .constructor (
+this [ '$_calculator/' + calculator ] = new this .constructor ( {
 
-calculator,
-typeof argv [ 0 ] === 'object' ? argv .shift () : undefined,
-$
+name: calculator,
+manifest: typeof argv [ 0 ] === 'object' ? argv .shift () : undefined,
+binder: $
 
-);
+} );
 
 this .add ( calculator );
 
 return $ [ Symbol .for ( 'calculator/' + calculator ) ] ( ... argv );
+
+};
+
+$$ ( $, formula, ... equation ) {
+
+if ( formula === undefined )
+return $ ();
+
+if ( ! equation .length && ! this .has ( formula ) )
+throw "Unknown formula";
+
+if ( equation .length )
+this [ '$_calculator/' + formula ] = new Formula ( { calculator: $ }, ... equation );
+
+this .add ( formula );
+
+return $ [ Symbol .for ( 'calculator/' + formula ) ] ();
 
 };
 
@@ -184,35 +178,11 @@ return [
 this .result,
 ... [ ... this ] .map (
 
-calculator => `#${ [ ... argv, calculator ] .join ( '/' ) } = ${ $ [ Symbol .for ( 'calculator/' + calculator ) ] .fetch ( this .constructor .#binder, ... argv, calculator ) .join ( '\n' ) }`
+calculator => `${ [ ... argv, calculator ] .join ( '/' ) } = ${ $ [ Symbol .for ( 'calculator/' + calculator ) ] .fetch ( this .constructor .#binder, ... argv, calculator ) .join ( '\n' ) }`
 
-),
-... $ .$ ()
+)
 
 ];
-
-};
-
-formula = new Map;
-
-$$ ( $, formula, ... equation ) {
-
-if ( formula === undefined )
-return [ ... this .formula ] .map (
-
-( [ formula, equation ] ) => `$${ formula } = ${ equation .join ( ' ' ) }`
-
-);
-
-if ( ! equation .length && ! this .formula .has ( formula ) )
-throw "Unknown formula";
-
-if ( ! equation .length )
-return $ [ '=' ] ( ... this .formula .get ( formula ) );
-
-this .formula .set ( formula, equation );
-
-return true;
 
 };
 
@@ -231,6 +201,26 @@ return ! argv .length ? $ : $ ( ... argv );
 [ '$..' ] ( $, ... argv ) {
 
 return ! argv .length ? this .binder || $ : ( this .binder || $ ) ( ... argv );
+
+};
+
+$_prompt ( $, ... argv ) {
+
+return [
+
+$ [ Symbol .for ( 'location' ) ] (),
+... argv
+
+] .join ( ': ' );
+
+};
+
+$_location () {
+
+if ( ! this .binder )
+return this .name ?.length ? [ this .name ] : [];
+
+return [ ... this .binder [ Symbol .for ( 'location' ) ] (), this .name ];
 
 };
 

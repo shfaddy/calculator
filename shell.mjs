@@ -2,42 +2,31 @@
 
 import Calculator from './index.mjs';
 import Scenarist from './scenarist.mjs';
+import Maitre from './maitre.mjs';
 import { createInterface } from 'node:readline';
 import { stdin as input, stdout as output } from 'node:process';
 
 try {
 
-Scenarist ( new class {
-
-constructor ( ... argv ) { this .argv = argv };
+Scenarist ( new class extends Maitre {
 
 $_producer ( $ ) {
 
 console .log ( "Hello World! This is Shaikh Faddy's Calculator!" );
 
-const { argv } = this;
-
 this .$_director = new Calculator;
 
 this .shell = createInterface ( { input, output } )
-.on ( 'line', line => $ ( Symbol .for ( 'process' ), line ) )
+.on ( 'line', line => $ ( Symbol .for ( 'serve' ), line ) )
 .on ( 'SIGINT', () => $ ( Symbol .for ( 'interrupt' ) ) );
 
-if ( argv .length )
-$ [ Symbol .for ( 'process' ) ] ( argv .join ( ' ' ) );
-
-$ [ Symbol .for ( 'prompt' ) ] ();
+return super .$_producer ( $ );
 
 };
 
-$_process ( $, line ) {
+$_response ( $, response ) {
 
-try {
-
-const argv = ( line = line .trim () ) .length ? line .split ( /\s+/ ) : [];
-const resolution = $ ( ... argv );
-
-switch ( typeof resolution ) {
+switch ( typeof response ) {
 
 case 'undefined':
 
@@ -45,37 +34,27 @@ break;
 
 case 'object':
 
-if ( resolution instanceof Array )
-console .log ( resolution .join ( '\n' ) );
+if ( response instanceof Array )
+console .log ( response .join ( '\n' ) );
 
 else
-for ( const output in resolution )
-console .log ( output, resolution [ output ] );
-
-break;
-
-case 'function':
-
-this .$_director = resolution;
+for ( const output in response )
+console .log ( output, response [ output ] );
 
 break;
 
 default:
 
-console .log ( resolution );
+console .log ( response );
 
 }
 
-} catch ( error ) {
+};
 
+$_apologize ( $, error ) {
+
+console .error ( "Sorry but something went wrong" );
 console .error ( error );
-
-}
-
-if ( ! this .shell )
-return process .exit ( 0 );
-
-$ [ Symbol .for ( 'prompt' ) ] ();
 
 };
 
@@ -88,6 +67,9 @@ $ [ Symbol .for ( 'prompt' ) ] ();
 };
 
 $_prompt ( $ ) {
+
+if ( ! this .shell )
+return process .exit ();
 
 let prompt = $ ( Symbol .for ( 'director' ), Symbol .for ( 'prompt' ) );
 
@@ -113,7 +95,11 @@ return "Okay, bye bye!";
 
 };
 
-} ( ... process .argv .slice ( 2 ) ) );
+} ( {
+
+request: process .argv .slice ( 2 )
+
+} ) );
 
 } catch ( error ) {
 
